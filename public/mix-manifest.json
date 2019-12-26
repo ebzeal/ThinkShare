@@ -1,0 +1,4 @@
+{
+    "/js/app.js": "/laravel/public/js/app.js",
+    "/css/app.css": "/laravel/public/css/app.css"
+}
