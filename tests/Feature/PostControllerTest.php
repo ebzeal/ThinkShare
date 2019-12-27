@@ -124,14 +124,16 @@ class PostControllerTest extends TestCase
     public function testDelete() {
         $post = $this->createSampleBlogPost();
         $this->assertDatabaseHas('blog_posts', $post->toArray());
-
+        
         $this->actingAs($this->user())
-            ->delete("/posts/{$post->id}")
-            ->assertStatus(302)
-            ->assertSessionHas('status');
+        ->delete("/posts/{$post->id}")
+        ->assertStatus(302)
+        ->assertSessionHas('status');
 
+        $this->assertSoftDeleted('blog_posts', $post->toArray());
+        
         $this->assertEquals(session('status'), 'Blog post was deleted');
-        $this->assertDatabaseMissing('blog_posts', $post->toArray());
+        // $this->assertDatabaseMissing('blog_posts', $post->toArray());
     }
 
 }
