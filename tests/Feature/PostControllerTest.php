@@ -69,13 +69,17 @@ class PostControllerTest extends TestCase
     }
 
     public function testAddNewBlogPost() {
+        // $user = $this->user();
+        
         $params = [
             'title' => 'Valid title',
             'content' => 'At least 10 characters'
         ];
+        // $this->actingAs($user);
 
         // 302 is status code for successful redirect
-        $this->post('/posts', $params)
+        $this->actingAs($this->user()) // for user authentication
+            ->post('/posts', $params)
             ->assertStatus(302)
             ->assertSessionHas('status');
 
@@ -88,7 +92,8 @@ class PostControllerTest extends TestCase
             'content' => 'a'
         ];
 
-        $this->post('/posts', $params)
+        $this->actingAs($this->user())
+        ->post('/posts', $params)
         ->assertStatus(302)
         ->assertSessionHas('errors');
 
@@ -105,7 +110,8 @@ class PostControllerTest extends TestCase
             'title' => 'A new named title',
             'content' => 'Content was changed'
         ];
-        $this->put("/posts/{$post->id}", $params)
+        $this->actingAs($this->user())
+            ->put("/posts/{$post->id}", $params)
             ->assertStatus(302)
             ->assertSessionHas('status');
         $this->assertEquals(session('status'), 'Blog post was updated');
@@ -119,7 +125,8 @@ class PostControllerTest extends TestCase
         $post = $this->createSampleBlogPost();
         $this->assertDatabaseHas('blog_posts', $post->toArray());
 
-        $this->delete("/posts/{$post->id}")
+        $this->actingAs($this->user())
+            ->delete("/posts/{$post->id}")
             ->assertStatus(302)
             ->assertSessionHas('status');
 
