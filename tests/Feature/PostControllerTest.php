@@ -33,13 +33,17 @@ class PostControllerTest extends TestCase
     //     return $post;
     // }
 
-    public function createSampleBlogPost(): BlogPost {
+    public function createSampleBlogPost($userId = null): BlogPost {
         // $post = new BlogPost();
         // $post->title = 'New title';
         // $post->content = 'Content of the blog post';
         // $post->save();
 
-        return factory(BlogPost::class)->states('new-title')->create();
+        return factory(BlogPost::class)->states('new-title')->create(
+            [
+                'user_id' => $userId ?? $this->user()->id,
+            ]
+        );
 
         // return $post;
     }
@@ -104,13 +108,14 @@ class PostControllerTest extends TestCase
 
     public function testUpdateValid()
     {
-        $post = $this->createSampleBlogPost();
+        $user = $this->user();
+        $post = $this->createSampleBlogPost($user->id);
         $this->assertDatabaseHas('blog_posts', $post->toArray());
         $params = [
             'title' => 'A new named title',
             'content' => 'Content was changed'
         ];
-        $this->actingAs($this->user())
+        $this->actingAs($user)
             ->put("/posts/{$post->id}", $params)
             ->assertStatus(302)
             ->assertSessionHas('status');
@@ -122,10 +127,11 @@ class PostControllerTest extends TestCase
 }
 
     public function testDelete() {
-        $post = $this->createSampleBlogPost();
+        $user = $this->user();
+        $post = $this->createSampleBlogPost($user->id);
         $this->assertDatabaseHas('blog_posts', $post->toArray());
         
-        $this->actingAs($this->user())
+        $this->actingAs($user)
         ->delete("/posts/{$post->id}")
         ->assertStatus(302)
         ->assertSessionHas('status');
