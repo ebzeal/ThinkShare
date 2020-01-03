@@ -7,6 +7,7 @@ use Faker\Generator as Faker;
 
 $factory->define(Comment::class, function (Faker $faker) {
     return [
-        'content' => $faker->text
+        'content' => $faker->text,
+        'created_at' => $faker->dateTimeBetween('-3 months'),
     ];
 });

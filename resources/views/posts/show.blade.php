@@ -1,30 +1,43 @@
 @extends('layout')
 
 @section('content')
-    <h1> {{ $post -> title }} </h1>
-    <p> {{ $post->content }} </p>
-    <p> Added {{ $post->created_at->diffForHumans() }} </p>
+    <div class="row">
+        <div class="col-8">
+            <h1>
+                {{ $post->title }}
+                @badge(['show' => now()->diffInMinutes($post->created_at) < 20])
+                    Brand new Post!
+                @endbadge
+            </h1>
 
-    <!-- @if ($post->id === 1)
-        Post one!
-    @elseif ($post->id === 2)
-        Post two!
-    @else
-        Post {{ $post->id }}
-    @endif -->
+            <p>{{ $post->content }}</p>
+            @updated(['date' => $post->created_at, 'name' => $post->user->name])
+            @endupdated
 
-    <h1>Comments</h1>
+            @updated(['date' => $post->updated_at])
+            Updated
+            @endupdated
 
-    @forelse($post->comments as $comment)
-    <p>
-        {{ $comment->content }}, 
-    </p>
-    <p class='text-muted'>
-    added {{ $comment->created_at->diffForHumans() }}
-    </p>
+            @tags(['tags' => $post->tags])@endtags
 
-    @empty
-        <p>No Comments yet</p>
-    @endforelse
 
+            <p class="text-muted">
+                {{ $counter }} people are currently reading this article
+            </p>
+
+            <h4>Comments</h4>
+
+            @forelse($post->comments as $comment)
+                <p>
+                    {{ $comment->content }}
+                </p>
+                @updated(['date' => $comment->created_at])
+                @endupdated
+            @empty
+                <p>No comments yet!</p>
+            @endforelse
+        </div>
+        <div class="col-4">
+            @include('posts._activity')
+        </div>
 @endsection('content')
