@@ -30,8 +30,7 @@ class PostController extends Controller
         return view(
             'posts.index',
             [
-                'posts' => BlogPost::latest()->withCount('comments')
-                    ->with('user')->with('tags')->get(),
+                'posts' => BlogPost::latestWithRelations()->get(),
             ]
         );
     }
@@ -67,6 +66,17 @@ class PostController extends Controller
 
         // $blogPost->save();
 
+        $hasFile = $request->hasFile('thumbnail');
+        dump($hasFile);
+        if ($hasFile) {
+            $file = $request->file('thumbnail');
+            dump($file);
+            dump($file->getClientMimeType());
+            dump($file->getClientOriginalExtension());
+            dump($file->store('thumbails'));
+        }
+        die;
+
         $request->session()->flash('status', 'Blog post was created');
 
         return redirect()->route('posts.show', ['post' => $blogPost->id]);
@@ -81,7 +91,8 @@ class PostController extends Controller
     public function show($id)
     {
         $blogPost = Cache::tags(['blog-post'])->remember("blog-post-{$id}", 60, function() use($id) {
-            return BlogPost::with('comments')->with('tags')->with('user')->findOrFail($id);
+            return BlogPost::with('comments', 'tags', 'user', 'comments.user')
+                ->findOrFail($id);
         });
         $sessionId = session()->getId();
         $counterKey = "blog-post-{$id}-counter";
