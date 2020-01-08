@@ -3,13 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\User;
+use App\Image;
+
 use App\BlogPost;
-
 use Illuminate\Http\Request;
-use App\Http\Requests\StorePost;
 
+use App\Http\Requests\StorePost;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
 
 
 class PostController extends Controller
@@ -66,19 +68,35 @@ class PostController extends Controller
 
         // $blogPost->save();
 
-        $hasFile = $request->hasFile('thumbnail');
-        dump($hasFile);
-        if ($hasFile) {
-            $file = $request->file('thumbnail');
-            dump($file);
-            dump($file->getClientMimeType());
-            dump($file->getClientOriginalExtension());
-            dump($file->store('thumbails'));
+        
+        // $hasFile = $request->hasFile('thumbnail');
+        // dump($hasFile);
+        // if ($hasFile) {
+        //     $file = $request->file('thumbnail');
+        //     dump($file);
+        //     dump($file->getClientMimeType());
+        //     dump($file->getClientOriginalExtension());
+        //     // dump($file->store('thumbails'));  // This line is a shorter version of the commented line below, they do the same thing
+        //     // dump(Storage::disk('public')->putFile('thumbails', $file)); 
+        //     // dump($file->storeAs('thumbails', $blogPost->id . '.'. $file->guessExtension())); // this line helps you store files with specified name
+        //     // dump(Storage::disk('local')->putFileAs('thumbails', $file, $blogPost->id . '.' . $file->guessExtension())); // does the same as the line above, you can specify the disk space here
+
+        //     dump($file->store('thumbails'));
+        //     dump(Storage::disk('public')->putFile('thumbails', $file));
+        //     $name1 = $file->storeAs('thumbails', $blogPost->id . '.'. $file->guessExtension());
+        //     $name2 = Storage::disk('local')->putFileAs('thumbails', $file, $blogPost->id . '.' . $file->guessExtension());
+        //     dump(Storage::url($name1));
+        //     dump(Storage::disk('local')->url($name2));
+        // }
+        // die;
+
+        if ($request->hasFile('thumbnail')) {
+            $path = $request->file('thumbnail')->store('thumbnails');
+            $blogPost->image()->save(
+                Image::make(['path' => $path])
+            );
         }
-        die;
-
-        $request->session()->flash('status', 'Blog post was created');
-
+        $request->session()->flash('status', 'Blog post was created!');
         return redirect()->route('posts.show', ['post' => $blogPost->id]);
     }
 
@@ -168,6 +186,22 @@ class PostController extends Controller
         $validatedData = $request->validated();
 
         $post->fill($validatedData);
+        
+
+        if ($request->hasFile('thumbnail')) {
+            $path = $request->file('thumbnail')->store('thumbnails');
+            if ($post->image) {
+                Storage::delete($post->image->path);
+                $post->image->path = $path;
+                $post->image->save();
+            } else {
+                $post->image()->save(
+                    Image::make(['path' => $path])
+                );
+            }
+        }
+
+
         $post->save();
         $request->session()->flash('status', 'Blog post was updated');
 
