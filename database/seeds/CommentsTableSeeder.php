@@ -2,6 +2,7 @@
 
 use App\BlogPost;
 Use App\Comment;
+Use App\User;
 use Illuminate\Database\Seeder;
 
 class CommentsTableSeeder extends Seeder
@@ -14,18 +15,22 @@ class CommentsTableSeeder extends Seeder
     public function run()
     {
         $posts = BlogPost::all();
-
-        if($posts->count() <= 0 ) {
-            $this->command->info('No comments will be added as there are no blog posts');
+        $users = User::all();
+        if ($posts->count() === 0 || $users->count() === 0) {
+            $this->command->info('There are no blog posts or users, so no comments will be added');
             return;
         }
+        $commentsCount = (int)$this->command->ask('How many comments would you like?', 150);
         
-        $commentCount = (int)$this->command->ask('How many commentswould you like?', 150);
-        
-        $users = App\User::all();
-        
-        factory(Comment::class, $commentCount)->make()->each(function ($comment) use ($posts, $users) {
-            $comment->blog_post_id = $posts->random()->id;
+        factory(App\Comment::class, $commentsCount)->make()->each(function ($comment) use ($posts, $users) {
+            $comment->commentable_id = $posts->random()->id;
+            $comment->commentable_type = 'App\BlogPost';
+            $comment->user_id = $users->random()->id;
+            $comment->save();
+        });
+        factory(App\Comment::class, $commentsCount)->make()->each(function ($comment) use ($users) {
+            $comment->commentable_id = $users->random()->id;
+            $comment->commentable_type = 'App\User';
             $comment->user_id = $users->random()->id;
             $comment->save();
         });

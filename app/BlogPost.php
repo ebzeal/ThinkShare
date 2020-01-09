@@ -3,6 +3,7 @@
 namespace App;
 
 
+use App\Traits\Taggable;
 use App\Scopes\DeletedPostsScope;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Database\Eloquent\Model;
@@ -13,20 +14,16 @@ class BlogPost extends Model
 {
     // protected $table = 'blogposts';
 
-    use SoftDeletes;
+    use SoftDeletes, Taggable;
 
     protected $fillable = ['title', 'content', 'user_id'];
 
     public function comments() {
-        return $this->hasMany('App\Comment')->latest();
+        return $this->morphMany('App\Comment', 'commentable')->latest();
     }
 
     public function user() {
         return $this->belongsTo('App\User');
-    }
-
-    public function tags() {
-        return $this->belongsToMany('App\Tag')->withTimeStamps();
     }
 
     public function image() {
