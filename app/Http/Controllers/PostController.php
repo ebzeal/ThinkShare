@@ -8,6 +8,7 @@ use App\Image;
 use App\BlogPost;
 use Illuminate\Http\Request;
 
+use App\Events\BlogPostPosted;
 use App\Http\Requests\StorePost;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Cache;
@@ -96,6 +97,9 @@ class PostController extends Controller
                 Image::make(['path' => $path])
             );
         }
+
+        event(new BlogPostPosted($blogPost));
+
         $request->session()->flash('status', 'Blog post was created!');
         return redirect()->route('posts.show', ['post' => $blogPost->id]);
     }
