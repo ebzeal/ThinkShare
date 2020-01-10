@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Comment;
 use App\BlogPost;
+use App\Services\Counter;
 use App\Observers\CommentObserver;
 use App\Observers\BlogPostObserver;
 use Illuminate\Support\Facades\Blade;
@@ -43,5 +44,17 @@ class AppServiceProvider extends ServiceProvider
 
         BlogPost::observe(BlogPostObserver::class);
         Comment::observe(CommentObserver::class);
+
+        $this->app->singleton(Counter::class, function ($app) {
+            return new Counter(
+                $app->make('Illuminate\Contracts\Cache\Factory'),
+                $app->make('Illuminate\Contracts\Session\Session'),
+                env('COUNTER_TIMEOUT')
+            );
+        });
+
+        // $this->app->when(Counter::class)
+        //     ->needs('$timeout')
+        //     ->give(env('COUNTER_TIMEOUT'));
     }
 }

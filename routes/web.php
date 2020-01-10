@@ -23,7 +23,7 @@ Route::get('/secret', 'HomeController@secret')
     Route::get('/posts/tag/{tag}', 'PostTagController@index')->name('posts.tags.index');
     
 Route::resource('posts', 'PostController');
-Route::resource('posts.comments', 'PostCommentController')->only(['store']);
+Route::resource('posts.comments', 'PostCommentController')->only([ 'index', 'store']);
 Route::resource('users.comments', 'UserCommentController')->only(['store']);
 Route::resource('users', 'UserController')->only(['show', 'edit', 'update']);
 Route::get('mailable', function () {

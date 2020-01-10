@@ -14,6 +14,16 @@ class Comment extends Model
 
     protected $fillable = ['user_id', 'content'];
 
+      /**
+     * The attributes that should be hidden for arrays.
+     *
+     * @var array
+     */
+    protected $hidden = [
+        'deleted_at', 'commentable_type', 'commentable_id', 'user_id'
+    ];
+
+
     public function commentable()
     {
         return $this->morphTo();

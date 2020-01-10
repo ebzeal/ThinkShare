@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\BlogPost;
 use App\Events\CommentPosted;
 use App\Http\Requests\StoreComment;
+use App\Http\Resources\Comment as CommentResource;
 
 class PostCommentController extends Controller
 {
@@ -11,6 +12,16 @@ class PostCommentController extends Controller
     {
         $this->middleware('auth')->only(['store']);
     }
+
+    public function index(BlogPost $post)
+    {
+        // dump(is_array($post->comments));
+        // dump(get_class($post->comments));
+        // die;
+        return CommentResource::collection($post->comments()->with('user')->get());
+        // return $post->comments()->with('user')->get();
+    }
+
     public function store(BlogPost $post, StoreComment $request)
     {
         $comment = $post->comments()->create([

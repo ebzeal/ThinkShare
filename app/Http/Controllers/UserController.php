@@ -4,15 +4,18 @@ namespace App\Http\Controllers;
 
 use App\User;
 use App\Image;
+use App\Services\Counter;
 use Illuminate\Http\Request;
 use App\Http\Requests\UpdateUser;
 
 class UserController extends Controller
 {
-    public function __construct()
+    private $counter;
+    public function __construct(Counter $counter)
     {
         $this->middleware('auth');
         $this->authorizeResource(User::class, 'user');
+        $this->counter = $counter;
     }
 
     /**
@@ -54,7 +57,11 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
-        return view('users.show', ['user' => $user]);
+        
+        return view('users.show', [
+            'user' => $user,
+            'counter' => $this->counter->increment("user-{$user->id}")
+        ]);
     }
 
     /**
